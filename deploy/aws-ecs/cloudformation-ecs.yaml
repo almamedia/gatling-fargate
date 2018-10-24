@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description:  Task definition and policies to run Gatling as Fargate task
+Parameters:
+  GatlingImage:
+    Type: String
+    Default: gatling-fargate
+    Description: Gatling-fargate docker image name
+  GatlingVersion:
+    Type: String
+    Description: Gatling version x.y.z
+  WorkBucket:
+    Type: String
+    Description: S3 bucket where configuration is stored and reports are synceed to
+
+Resources:
+  EcsTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Cpu: 1vcpu
+      Family: !Sub gatling-fargate
+      Memory: 2gb
+      NetworkMode: awsvpc
+      TaskRoleArn: !Ref TaskRole
+      ExecutionRoleArn: !Ref ExecutionRole
+      RequiresCompatibilities:
+          - FARGATE
+      ContainerDefinitions:
+        - Name: !Sub gatling-fargate-container-def
+          Command:
+            - "bash"
+            - "run.sh"
+          Cpu: 1024
+          DisableNetworking: false
+          Essential: true
+          Image: !Sub ${GatlingImage}:${GatlingVersion}
+          Memory: 2048
+          MemoryReservation: 2048
+          Environment:
+            - Name: WORK_BUCKET
+              Value: !Ref WorkBucket
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Sub ${AWS::Region}
+              awslogs-group: !Sub gatling-fargate
+              awslogs-stream-prefix: !Sub gatling-fargate-${GatlingVersion}
+              awslogs-create-group: true
+          Privileged: false
+          ReadonlyRootFilesystem: false
+
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      RoleName: !Sub gatling-fargate-task-role
+
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      RoleName: !Sub gatling-fargate-execution-role
+
+  TaskRolePolicy:
+    Type : AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub gatling-fargate-task-policy
+      PolicyDocument:
+        Statement:
+          - Sid: AllowWorkBucketFullAccess
+            Effect: Allow
+            Resource:
+              - !Sub "arn:aws:s3:::${WorkBucket}"
+              - !Sub "arn:aws:s3:::${WorkBucket}/*"
+            Action:
+              - "s3:*"
+      Roles:
+        - !Ref TaskRole
+
+  ExecutionRolePolicy:
+    Type : AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub gatling-fargate-execution-policy
+      PolicyDocument:
+        Statement:
+          - Sid: AllowEbAuth
+            Effect: Allow
+            Action:
+              - "ecr:GetAuthorizationToken"
+            Resource: "*"
+          - Sid: AllowCloudWatchLogs
+            Effect: Allow
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+              - "logs:DescribeLogStreams"
+            Resource:
+              - "arn:aws:logs:*:*:*"
+          - Sid: AllowEcsOperations
+            Effect: Allow
+            Action:
+              - "ecs:*"
+            Resource:
+              - "*"
+          - Sid: AllowPullingContainers
+            Effect: Allow
+            Action:
+              - "ecr:*"
+            Resource:
+              - "*"
+      Roles:
+        - !Ref ExecutionRole
+
+Outputs:
+  TaskDefinitionARN:
+    Description: ARN for the task definition of the gatling task
+    Value: !Ref EcsTaskDefinition
+  
