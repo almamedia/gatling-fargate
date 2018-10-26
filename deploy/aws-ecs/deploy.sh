@@ -16,11 +16,11 @@ export GATLING_BUCKET=$5
 
 
 aws cloudformation validate-template \
-    --template-body file://aws-ecs/cloudformation-ecs.yaml || exit 1
+    --template-body file://cloudformation-ecs.yaml || exit 1
 
 aws cloudformation deploy \
     --stack-name gatling-fargate \
-    --template-file ./aws-ecs/cloudformation-ecs.yaml \
+    --template-file ./cloudformation-ecs.yaml \
     --parameter-overrides "GatlingImage=${GATLING_IMAGE}" "GatlingVersion=${GATLING_VERSION}" "WorkBucket=${GATLING_BUCKET}" \
     --capabilities CAPABILITY_NAMED_IAM \
     --no-fail-on-empty-changeset || exit 1

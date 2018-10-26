@@ -10,9 +10,11 @@ Load simulations and gatling config from S3 bucket given in WORK_BUCKET environm
 /conf
 ```
 
-Docker image's ENTRYPOINT is a light wrapper script around gatling itself that syncs simulations and config from S3 bucket, runs gatling with command line parameters given to the docker image and after gatling finishes, syncs results back to S3 bucket. 
+Docker image is based on public denvazh/gatling image. Versioning is thought to follow base image's versioning.
 
-To see the results, configure the s3 bucket to act as a website and browse /results.
+Docker image's ENTRYPOINT is a light wrapper script around gatling.sh. Wrapper syncs simulations and config from S3 bucket, runs gatling with command line parameters given to the docker image and after gatling finishes, syncs results back to S3 bucket.
+
+To inspect the results, configure the s3 bucket to act as a website and browse /results.
 
 Build Docker image
 ===
@@ -36,7 +38,7 @@ Deploy as a fargate task
 ===
 Build and push the Docker image to your favourite docker registry (ECR on the same AWS account you plan to run on, dockerhub, etc.)
 
-Push script in docker subdir assumes that you have ECR repository named gatling-fargate and pushes there, you can then use image name pointing there in deploy.
+Push script in docker subdir assumes that you have access to ECR repository named gatling-fargate and pushes there, you can then use that image to deploy as long as your Fargate cluster has access to repository.
 
 Deploy ECS task definition:
 ```

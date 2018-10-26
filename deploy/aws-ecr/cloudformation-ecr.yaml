@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ECR repository for gatling-fargate application
+Parameters:
+  RepositoryName:
+    Type: String
+    Description: Name for the Elastic Container Registry's repository
+  AllowedAccounts:
+    Type: List<String>
+    Description: Comma-separated list of accounts (account ids) that are granted access to push/pull containers to/from registry
+Resources:
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: !Ref RepositoryName
+      RepositoryPolicyText:
+        Version: "2012-10-17"
+        Statement: 
+          - Sid: AllowPushPullForOtherAccounts
+            Effect: Allow
+            Principal: 
+              AWS: !Ref AllowedAccounts
+            Action: 
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:PutImage"
+              - "ecr:InitiateLayerUpload"
+              - "ecr:UploadLayerPart"
+              - "ecr:CompleteLayerUpload"
