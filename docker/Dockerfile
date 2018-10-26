@@ -10,4 +10,4 @@ RUN pip install --upgrade awscli
 
 ADD ./run-gatling.sh /opt/gatling/run-gatling.sh
 
-ENTRYPOINT [run-gatling.sh]
+ENTRYPOINT [ "/opt/gatling/run-gatling.sh" ]
