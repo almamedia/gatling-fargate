@@ -10,7 +10,7 @@ Load simulations and gatling config from S3 bucket given in WORK_BUCKET environm
 /conf
 ```
 
-Docker image is based on public denvazh/gatling image. Versioning is thought to follow base image's versioning.
+Docker image is based on public [denvazh/gatling](https://hub.docker.com/r/denvazh/gatling/) image. Versioning is thought to follow base image's versioning.
 
 Docker image's ENTRYPOINT is a light wrapper script around gatling.sh. Wrapper syncs simulations and config from S3 bucket, runs gatling with command line parameters given to the docker image and after gatling finishes, syncs results back to S3 bucket.
 
