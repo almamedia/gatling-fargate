@@ -91,7 +91,7 @@ aws ecs run-task \
   --overrides '{"containerOverrides":[ \
     { \
       "name": "gatling-fargate-conteiner-def, \
-      "command": "--simulation <Simulation class name>" \
+      "command": ["--simulation", "Simulation class name>"] \
     } \
    ]}'
 ```
