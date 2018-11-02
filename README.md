@@ -1,7 +1,7 @@
 # gatling-fargate
 Run Gatling load testing tool as a task in Fargate.
 
-Load simulations and gatling config from S3 bucket given in WORK_BUCKET environment variable. The bucket should have following directory structure
+Load simulations and gatling config from S3 bucket given in WORK_BUCKET environment variable. The bucket should have following directory structure. /conf is optional.
 
 ```
 /user-files
@@ -12,9 +12,9 @@ Load simulations and gatling config from S3 bucket given in WORK_BUCKET environm
 
 Docker image is based on public [denvazh/gatling](https://hub.docker.com/r/denvazh/gatling/) image. Versioning is thought to follow base image's versioning.
 
-Docker image's ENTRYPOINT is a light wrapper script around gatling.sh. Wrapper syncs simulations and config from S3 bucket, runs gatling with command line parameters given to the docker image and after gatling finishes, syncs results back to S3 bucket.
+Docker image's ENTRYPOINT is a very simple wrapper script around gatling.sh. Wrapper syncs simulations and config from S3 bucket, runs gatling with command line parameters given to the docker image and after gatling finishes, syncs results back to the same S3 bucket.
 
-To inspect the results, configure the s3 bucket to act as a website and browse /results.
+To inspect the results, sync them to your workstation from S3 or configure the s3 bucket to act as a website and browse /results.
 
 ## Build Docker image
 
@@ -38,7 +38,7 @@ You need AWS credentials with a default profile having full access to a S3 bucke
 
 Build and push the Docker image to your favourite docker registry (ECR on the same AWS account you plan to run on, dockerhub, etc.)
 
-Push script in docker subdir assumes that you have access to ECR repository named gatling-fargate and pushes there, you can then use that image to deploy as long as your Fargate cluster has access to repository.
+Push script in docker subdir assumes that you have access to ECR repository named gatling-fargate and uses that, you can then use that image to deploy as long as your Fargate cluster has access to repository.
 
 Deploy ECS task definition:
 ```
@@ -56,7 +56,7 @@ Commandline would look like this:
 aws ecs run-task --cluster <your ecs cluster> --task-definition gatling-fargate --overrides <json>
 ```
 
-The override JSON looks like following snippet, unnecessary fields are ommitted. Specifically, the field to override gatling parameters is containerOverrides.command
+The override JSON is a little bit verbose, it looks like following snippet. Unnecessary fields can be ommitted. Specifically, the field to override gatling parameters is containerOverrides.command. containerOverrides.name field is mandatory, The sole containedDEfinition inside the task definition is named gatling-fargate-container-def.
 
 ```
 {
@@ -87,10 +87,10 @@ The override JSON looks like following snippet, unnecessary fields are ommitted.
 ```
 aws ecs run-task \
   --cluster <your ecs cluster> \
-  --task-definition gatling-fargate 
+  --task-definition gatling-fargate \
   --overrides '{"containerOverrides":[ \
     { \
-      "name": "gatling-fargate-conteiner-def, \
+      "name": "gatling-fargate-container-def, \
       "command": ["--simulation", "Simulation class name>"] \
     } \
    ]}'
