@@ -16,9 +16,9 @@ Resources:
   EcsTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Cpu: 1vcpu
+      Cpu: 2vcpu
       Family: !Sub gatling-fargate
-      Memory: 2gb
+      Memory: 16gb
       NetworkMode: awsvpc
       TaskRoleArn: !Ref TaskRole
       ExecutionRoleArn: !Ref ExecutionRole
