@@ -18,7 +18,7 @@ To inspect the results, configure the s3 bucket to act as a website and browse /
 
 Build Docker image
 ===
-Build takes one build argument, which is GATLING_VERSION.
+Build takes one build argument, which is GATLING_VERSION. NOTE: Gatling >= 3.0.0 is assumed, script command line arguments in run-gatling.sh are adjusted accordingly 
 
 ```
 cd docker
