@@ -22,7 +22,7 @@ Build takes one build argument, which is GATLING_VERSION.
 
 ```
 cd docker
-docker build --build-arg GATLING_VERSION=<gatling version> -t <docker image name>:<tag>
+docker build --build-arg GATLING_VERSION=<gatling version> -t <docker image name>:<tag> .
 ```
 
 Run Docker image locally
