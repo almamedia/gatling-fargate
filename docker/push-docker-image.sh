@@ -13,7 +13,11 @@ VERSION=$3
 ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 DOCKER_IMAGE="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/gatling-fargate"
 
-docker build --build-arg GATLING_VERSION=${VERSION} -t ${DOCKER_IMAGE}:${VERSION} .
+mkdir -p downloads
+wget -q -O downloads/gatling.zip https://repo1.maven.org/maven2/io/gatling/highcharts/gatling-charts-highcharts-bundle/$VERSION/gatling-charts-highcharts-bundle-$VERSION-bundle.zip
+
+
+docker build --no-cache --build-arg GATLING_VERSION="${VERSION}" -t "${DOCKER_IMAGE}:${VERSION}" .
 
 DOCKER_LOGIN=$(aws ecr get-login --no-include-email)
 

@@ -7,7 +7,7 @@ aws s3 sync s3://$WORK_BUCKET/conf /opt/gatling/conf
 aws s3 sync s3://$WORK_BUCKET/results /opt/gatling/results
 
 # Run gatling
-JAVA_OPTS="-Dsun.net.inetaddr.ttl=10" /opt/gatling/bin/gatling.sh -bf /opt/gatling/user-files/bin $@
+export JAVA_OPTS="-Dsun.net.inetaddr.ttl=10 $JAVA_OPTS" && /opt/gatling/bin/gatling.sh -bf /opt/gatling/user-files/bin $@
 
 # Sync report and logs to S3
 aws s3 sync /opt/gatling/results s3://$WORK_BUCKET/results
